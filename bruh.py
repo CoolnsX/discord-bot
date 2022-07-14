@@ -23,8 +23,10 @@ async def on_message(message):
 
     if message.author == waifu:
         return
-
-    if message.channel.name == "bot-sfw" or message.channel.name == "bots-nsfw":
+    
+    bot_sfw = "972595831142248518"
+    bot_nsfw = "972572560564822107"
+    if message.channel.id == f"{bot_sfw}" or message.channel.id == f"{bot_nsfw}":
         if usermsg.lower() == "!hello":
             await message.channel.send(f"Hello {username}")
             return
@@ -69,8 +71,8 @@ async def on_message(message):
         return
 
     if usermsg.lower() == "!hentai":
-        if message.channel.name != "bots-nsfw":
-            await message.channel.send(f"Umm.. Master doesn't allow me to post here, come to #bots-nsfw channel {username}")
+        if message.channel.id != f"{bot_nsfw}":
+            await message.channel.send(f"Umm.. Master doesn't allow me to post here, come to <#{bot_nsfw}> channel {username}")
             return
         else:
             lol = re.findall(r'id="post-hot-(.*?)"',requests.get("https://hentaimama.io/").text)
@@ -79,8 +81,8 @@ async def on_message(message):
             await message.channel.send(f"Here uwu go {message.author.mention}\n{video_url}")
             return
   
-    if usermsg.lower() == "!anywhere" and message.channel.name != "bot-sfw" :
-        await message.channel.send(f"Umm.. My master doesn't allow me to post here, Please come to #bot-sfw or #bots-nsfw channel {username}")
+    if usermsg.lower() == "!anywhere" and message.channel.id != f"{bot_sfw}" :
+        await message.channel.send(f"Umm.. My master doesn't allow me to post here, Please come to <#{bot_sfw}> or <#{bot_nsfw}> channel, {username}")
         return
 
 waifu.run(<your_token_in_quotes>)
