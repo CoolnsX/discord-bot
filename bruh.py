@@ -2,17 +2,21 @@ import discord, requests, re, random, base64
 
 waifu = discord.Client()
 
-ban_words = {'java','microsoft','windows','c#','javascript','whine', 'whi_ne', 'whitespace_negative', 'whi-nyan', 'whi~nyaan!', 'whi whi'}
-abusive_words = {'fuck','fk','wtf','shit','nigga','mf','mfs','bitch','ur mom','bad','cringe'}
-good_words = {'moe bot','kawai bot','good bot'}
+image = {'sad':'https://raw.githubusercontent.com/CoolnsX/discord-bot/main/sad.png','smug':'https://raw.githubusercontent.com/CoolnsX/discord-bot/main/smug.jpg','cringe':'https://raw.githubusercontent.com/CoolnsX/discord-bot/main/cringe.jpg'}
 
-def anime_link(ani,ep=0,t=""):
-    ids = re.findall(r'\?id=([^&]+)',requests.get(ani,headers={'user-agent':'uwu'}).text)
-    id1 = ids[ep-1]
+def anime_link(ani,ep=0):
+    resp = requests.get(ani,headers={'user-agent':'uwu'}).text
+    ids = re.findall(r'\?id=([^&]+)',resp)
     ep = len(ids) if ep == 0 else ep
-    title = ani.split('/')[-2].replace('-',' ')+f" episode {ep}" if not t else t 
-    id1 = base64.b64encode(f"{id1}LTXs3GrU8we9O{base64.b64encode(id1.encode()).decode()}".encode()).decode()
-    url = base64.b64decode(requests.get(f"https://animixplay.to/api/live{id1}",headers={'user-agent':'uwu'},allow_redirects=False).headers['Location'].split("#")[1]).decode()
+    title = ani.split('/')[-2].replace('-',' ')+f" episode {ep}"
+    try :
+        id1 = ids[ep-1]
+        id1 = base64.b64encode(f"{id1}LTXs3GrU8we9O{base64.b64encode(id1.encode()).decode()}".encode()).decode()
+        url = base64.b64decode(requests.get(f"https://animixplay.to/api/live{id1}",headers={'user-agent':'uwu'},allow_redirects=False).headers['Location'].split("#")[1]).decode()
+    except IndexError:
+        id1 = re.search(r'player.html#([^"]*)',resp)[1]
+        url = base64.b64decode(id1.encode()).decode()
+
     return [f"mpv '{url}' --force-media-title='{title.title()}'",title.title(),url]
 
 def hentai_link(x):
@@ -31,9 +35,6 @@ async def on_message(message):
         return
 
     if message.channel.name == "bot-sfw" or message.channel.name == "bots-nsfw":
-        if usermsg.lower() == "!hello":
-            await message.channel.send(f"Hello {username}")
-            return
         if usermsg.lower() == "!ping":
             await message.channel.send(f"boing boing {username} UWU")
             return
@@ -42,7 +43,7 @@ async def on_message(message):
             await message.channel.send(f"Here uwu Go\n{data}")
             return
         elif usermsg.lower() == "!info":
-            await message.channel.send("```\nGive Orders:\n!status > gives ani-cli providers status..\n!info > this help menu\n!hello > just greetings.. cause I don't have necessary holes for you\n!anime > gives random anime link (animixplay)\n!anime anime_name > gives query anime link (animixplay)\n!hentai > gives the random hentai video url(works only in #bots-nsfw channel)\n!doujin > gives random nhentai link(works only in #bots-nsfw channel)\n!doujin @username > give dare to mentioned username\n\n\t<-- This girl is shaped by ani-cli discord members with ❤️. Take care of her wisely.. -->```")
+            await message.channel.send("```\nGive Orders:\n!status > gives ani-cli providers status..\n!info > this help menu\n!ping > just pings.. cause I don't have necessary holes for you\n!image [ls|list] > list all images link\n!image add name image_link_no_quotes > add images links with name for calling\n!image [rm|del] name > remove the image name with link\n !anime > gives random anime link (animixplay)\n!anime anime_name,episode(optional) > gives query anime link (animixplay)\n!hentai > gives the random hentai video url(works only in #bots-nsfw channel)\n!hentai hentai_name,episode(optional) > gives hentai video url\n!doujin > gives random nhentai link(works only in #bots-nsfw channel)\n!doujin @username > give dare to mentioned username\n\n\t<-- This girl is shaped by ani-cli discord members with ❤️. Take care of her wisely.. -->```")
             return
         elif usermsg.lower().split(" ")[0] == '!anime':
             if (usermsg.lower().split(" ")[1:]):
@@ -54,47 +55,36 @@ async def on_message(message):
                 await message.channel.send(f"\n```sh\n{link[0]}```",embed=discord.Embed(title=link[1],url=link[2],description="Direct Video Link for watching on any platform"))
                 return
             else:
-                anime = requests.get("https://animixplay.to/random",headers={'user-agent':'uwu'},allow_redirects=False).headers['Location']
-                await message.channel.send(f"Here uwu Go \nhttps://animixplay.to{anime}")
+                await message.channel.send("Here uwu Go \nhttps://animixplay.to{}".format(requests.get("https://animixplay.to/random",headers={'user-agent':'uwu'},allow_redirects=False).headers['Location']))
                 return
 
-    if usermsg.lower().split(" ")[0] == '!banword':
-        if usermsg.lower().split(" ")[1] == 'list':
-            await message.channel.send(f"Here uwu Go \n{ban_words}")
+    if usermsg.lower().split(" ")[0] == '!image':
+        if usermsg.lower().split(" ")[1] in image:
+            await message.channel.send(image[usermsg.lower().split(' ')[1]])
+            print(image[usermsg.lower().split(' ')[1]])
             return
-        elif usermsg.lower().split(" ")[1] == 'add':
-            ban_words.update(usermsg.lower().split(' ')[2:])
-            await message.channel.send(f"Done {username}")
+        elif usermsg.lower().split(" ")[1] in ['list','ls']:
+            await message.channel.send(f"Here uwu Go\n{image}")
             return
-        elif usermsg.lower().split(" ")[1] == 'rm':
-            ban_words.difference_update(usermsg.lower().split(' ')[2:])
-            await message.channel.send(f"Done {username}")
+        elif usermsg.lower().split(" ")[1] in ['add']:
+            try:
+                if usermsg.split(' ')[3].strip('<>').startswith('http'):
+                    image[usermsg.lower().split(' ')[2]]=usermsg.split(' ')[3].strip('<>')
+                    await message.channel.send(f"Done {username}")
+                else:
+                    await message.channel.send(f"Invalid Link!! {username}")
+            except IndexError:
+                await message.channel.send(f"Insufficient data!! {username}")
             return
-
-    if usermsg.lower().split(" ")[0] == '!abuse':
-        if usermsg.lower().split(" ")[1] == 'list':
-            await message.channel.send(f"Here uwu Go \n{abusive_words}")
+        elif usermsg.lower().split(" ")[1] in ['rm','del']:
+            try:
+                del image[usermsg.lower().split(' ')[2]]
+                await message.channel.send(f"Done {username}")
+            except KeyError:
+                await message.channel.send(f"Doesn't Exist!! {username}")
             return
-        elif usermsg.lower().split(" ")[1] == 'add':
-            abusive_words.update(usermsg.lower().split(' ')[2:])
-            await message.channel.send(f"Done {username}")
-            return
-        elif usermsg.lower().split(" ")[1] == 'rm':
-            abusive_words.difference_update(usermsg.lower().split(' ')[2:])
-            await message.channel.send(f"Done {username}")
-            return
-
-    if usermsg.lower().split(" ")[0] == '!good':
-        if usermsg.lower().split(" ")[1] == 'list':
-            await message.channel.send(f"Here uwu Go \n{good_words}")
-            return
-        elif usermsg.lower().split(" ")[1] == 'add':
-            good_words.update(usermsg.lower().split(' ')[2:])
-            await message.channel.send(f"Done {username}")
-            return
-        elif usermsg.lower().split(" ")[1] == 'rm':
-            good_words.difference_update(usermsg.lower().split(' ')[2:])
-            await message.channel.send(f"Done {username}")
+        else:
+            await message.channel.send(f"Doesn't Exist!! {username}")
             return
 
     if usermsg.lower().split(" ")[0] == "!doujin":
@@ -133,21 +123,8 @@ async def on_message(message):
             await message.channel.send(f"Here uwu go {message.author.mention}\n{video_url}")
             return
   
-    if abusive_words.intersection(set(usermsg.lower().split())) and ban_words.intersection(set(usermsg.lower().split())):
-        await message.channel.send("https://raw.githubusercontent.com/CoolnsX/discord-bot/main/smug.jpg")
-        return
-    elif ban_words.intersection(set(usermsg.lower().split())):
-        await message.channel.send("https://raw.githubusercontent.com/CoolnsX/discord-bot/main/sad.png")
-        return
-    elif abusive_words.intersection(set(usermsg.lower().split())):
-        await message.channel.send("https://raw.githubusercontent.com/CoolnsX/discord-bot/main/cringe.jpg")
-        return
-    elif good_words.intersection(set(usermsg.lower().split())):
-        await message.channel.send("https://raw.githubusercontent.com/CoolnsX/discord-bot/main/smug.jpg")
-        return
-
     if usermsg.lower() == "!anywhere" and message.channel.name != "bot-sfw" :
         await message.channel.send(f"Umm.. My master doesn't allow me to post here, Please come to #bot-sfw or #bots-nsfw channel {username}")
         return
 
-waifu.run(<your_token>)
+waifu.run(<your_token_key>)
