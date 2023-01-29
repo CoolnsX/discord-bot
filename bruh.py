@@ -22,7 +22,7 @@ async def ping(interaction: discord.Interaction):
 @tree.command(name='megamind', description= 'megamind with text')
 async def megamind(interaction : discord.Interaction,text:str = 'No bitches??'):
         await interaction.response.defer()
-        subprocess.run(args=['convert', '-pointsize', '45', '-fill', 'white', '-annotate','+40+50',text,'-font','Roboto-regular','mmind.png','out.jpg'])
+        subprocess.run(args=['convert', '-pointsize', '45', '-fill', 'white', '-annotate','+40+50',text,'-font','Roboto-regular','https://raw.githubusercontent.com/CoolnsX/discord-bot/main/mmind.png','out.jpg'])
         await interaction.followup.send(file=discord.File('out.jpg'))
 
 @tree.command(name='anime', description= 'ask me anime,will give you link')
