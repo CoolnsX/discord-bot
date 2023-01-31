@@ -1,4 +1,4 @@
-import discord , requests, re, subprocess
+import discord , requests, re, subprocess, os
 from discord import app_commands
 
 def hentai_link(x):
@@ -18,6 +18,19 @@ async def on_ready():
 @tree.command(name='ping', description= 'latency to reach my heart')
 async def ping(interaction: discord.Interaction):
         await interaction.response.send_message(f'Boing Boing UwU! (took {round(waifu.latency*1000)} ms)')
+
+@waifu.event
+async def on_message(ctx):
+        if ctx.author == waifu.user:
+                return
+        try:
+                num = re.findall(r'(\d+)',ctx.content)[0]
+                if (len(num) > 4 and len(num) < 7):
+                        print(ctx.author,ctx.content,'\n')
+                        await ctx.channel.send(f'{ctx.author.mention}\nhttps://nhentai.net/g/{num}/')
+        except:
+                pass
+
 
 @tree.command(name='megamind', description= 'megamind with text')
 async def megamind(interaction : discord.Interaction,text:str = 'No bitches??'):
@@ -49,20 +62,23 @@ async def anime(interaction : discord.Interaction,anime:str,episode:int = -1):
                         embed=discord.Embed(title=title,url=video_url,description="Direct Video Link for watching on any platform")
                     )
                     return
-                await interaction.followup.send("No video url")
-        except IndexError:
-                await interaction.followup.send("Error")
+                await interaction.followup.send("No video url",ephemeral=True)
+        except:
+                await interaction.followup.send("Error",ephemeral=True)
 
 @tree.command(name='hentai', description= 'ask me hentai,will give you link')
 async def hentai(interaction,hentai:str,episode:int = 0):
         if not interaction.channel.is_nsfw():
-                await interaction.response.send_message("I only send in nsfw enabled channels")
+                await interaction.response.send_message("I only send in nsfw enabled channels",ephemeral=True)
                 return
 
         await interaction.response.defer()
-        result = re.search(r'\s<a.*/tvshows/([^"]*)/',requests.get("https://hentaimama.io/?s={}".format(hentai.replace(' ','-'))).text)[1]
-        ep_list = re.findall(r'\s<a.*hentaimama.io/episodes/([^"]*)/">',requests.get(f"https://hentaimama.io/tvshows/{result}/").text)[::-1]
-        video_url = hentai_link(re.search(r"\?p=([^']*)",requests.get(f"https://hentaimama.io/episodes/{ep_list[episode-1]}/").text)[1])
-        await interaction.followup.send(f"Here uwu go",embed=discord.Embed(title=ep_list[episode-1].replace("-"," ").title(),url=video_url,description="Have Fun"))
+        try:
+                result = re.search(r'\s<a.*/tvshows/([^"]*)/',requests.get("https://hentaimama.io/?s={}".format(hentai.replace(' ','-'))).text)[1]
+                ep_list = re.findall(r'\s<a.*hentaimama.io/episodes/([^"]*)/">',requests.get(f"https://hentaimama.io/tvshows/{result}/").text)[::-1]
+                video_url = hentai_link(re.search(r"\?p=([^']*)",requests.get(f"https://hentaimama.io/episodes/{ep_list[episode-1]}/").text)[1])
+                await interaction.followup.send(f"Here uwu go",embed=discord.Embed(title=ep_list[episode-1].replace("-"," ").title(),url=video_url,description="Have Fun"))
+        except:
+                await interaction.followup.send('Error',ephemeral=True)
 
 waifu.run('<your_token_here>')
