@@ -1,7 +1,7 @@
 import discord , requests, re, subprocess, os
 from discord import app_commands
 
-anime_url = "https://allanime.site"
+anime_url = "https://api.allanime.to"
 hentai_url = "https://hentaimama.io"
 
 def hentai_link(x):
@@ -38,8 +38,26 @@ async def ping(interaction: discord.Interaction):
 @tree.command(name='megamind', description= 'megamind with text')
 async def megamind(interaction : discord.Interaction,text:str = 'No bitches??'):
         await interaction.response.defer()
-        subprocess.run(args=['convert', '-pointsize', '45', '-fill', 'white', '-annotate','+20+50',text,'-font','Roboto-regular','https://raw.githubusercontent.com/CoolnsX/discord-bot/main/mmind.png','/tmp/out.jpg'])
+        subprocess.run(args=['convert', '-pointsize', '40', '-fill', 'white','-gravity', 'north' ,'-annotate','+0+0',' '.join(text.split(' ')[:2]),'-annotate','+0+50',' '.join(text.split(' ')[2:]),'-font','/usr/share/fonts/truetype/roboto/unhinted/RobotoTTF/Roboto-Regular.ttf','https://raw.githubusercontent.com/CoolnsX/discord-bot/main/mmind.png','/tmp/out.jpg'])
         await interaction.followup.send(file=discord.File('/tmp/out.jpg'))
+
+@tree.command(name='asciimind', description= 'megamind ascii with text')
+async def megamind(interaction : discord.Interaction,text:str = 'No bitches??'):
+        await interaction.response.send_message("""———————————{}———————————
+⠀⣞⢽⢪⢣⢣⢣⢫⡺⡵⣝⡮⣗⢷⢽⢽⢽⣮⡷⡽⣜⣜⢮⢺⣜⢷⢽⢝⡽⣝
+⠸⡸⠜⠕⠕⠁⢁⢇⢏⢽⢺⣪⡳⡝⣎⣏⢯⢞⡿⣟⣷⣳⢯⡷⣽⢽⢯⣳⣫⠇
+⠀⠀⢀⢀⢄⢬⢪⡪⡎⣆⡈⠚⠜⠕⠇⠗⠝⢕⢯⢫⣞⣯⣿⣻⡽⣏⢗⣗⠏⠀
+⠀⠪⡪⡪⣪⢪⢺⢸⢢⢓⢆⢤⢀⠀⠀⠀⠀⠈⢊⢞⡾⣿⡯⣏⢮⠷⠁⠀⠀
+⠀⠀⠀⠈⠊⠆⡃⠕⢕⢇⢇⢇⢇⢇⢏⢎⢎⢆⢄⠀⢑⣽⣿⢝⠲⠉⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⡿⠂⠠⠀⡇⢇⠕⢈⣀⠀⠁⠡⠣⡣⡫⣂⣿⠯⢪⠰⠂⠀⠀⠀⠀
+⠀⠀⠀⠀⡦⡙⡂⢀⢤⢣⠣⡈⣾⡃⠠⠄⠀⡄⢱⣌⣶⢏⢊⠂⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⢝⡲⣜⡮⡏⢎⢌⢂⠙⠢⠐⢀⢘⢵⣽⣿⡿⠁⠁⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠨⣺⡺⡕⡕⡱⡑⡆⡕⡅⡕⡜⡼⢽⡻⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⣼⣳⣫⣾⣵⣗⡵⡱⡡⢣⢑⢕⢜⢕⡝⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⣴⣿⣾⣿⣿⣿⡿⡽⡑⢌⠪⡢⡣⣣⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⡟⡾⣿⢿⢿⢵⣽⣾⣼⣘⢸⢸⣞⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠁⠇⠡⠩⡫⢿⣝⡻⡮⣒⢽⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+——————————————————————{}""".format(text,'—'*(len(text)-4)))
 
 @tree.command(name='anime', description= 'ask me anime,will give you link')
 async def anime(interaction : discord.Interaction,anime:str,episode:int = -1):
